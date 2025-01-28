@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useNavigate, Routes, Route, useLocation } from 'react-router-dom';
+
 import axios from 'axios';
 import Header from './components/Header/Header';
 import Image from './components/Image/Image';
@@ -10,14 +12,25 @@ function App() {
   const [score, setScore] = useState(0);
   const [options, setOptions] = useState([]);
   const [questions, setQuestions] = useState([]);
-  const[number, setNumber] = useState(0)
+  const [number, setNumber] = useState(0)
   const [visited, setVisited] = useState([])
   const [gameOver, setGameOver] = useState(false);
   const [shouldRestart, setShouldRestart] = useState(false);  // Added this line
   const [attempted, setAttempted] = useState(0)
+  const [time, setTime] = useState(0);
+  const [gameStart, setGameStart] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setQuestions([5,10,15,20]);
+    let interval;
+    if (!gameOver && gameStart) {
+      interval = setInterval(() => {
+        setTime((prevTime) => prevTime + 1);
+      }, 1000);
+    }
+
+    // Clear the interval when the game is over or component unmounts
     const fetchLogo = async () => {
       try {
         const response = await axios.get('http://localhost:5000/api/logos');
@@ -28,9 +41,10 @@ function App() {
       }
     };
     fetchLogo();
-  }, []);
+    return () => clearInterval(interval);
 
-  // Added this useEffect for restart handling
+  }, [gameStart, gameOver]);
+
   useEffect(() => {
     if (shouldRestart) {
       setScore(0);
@@ -40,6 +54,9 @@ function App() {
       setShouldRestart(false);
       setAttempted(0);
       setNumber(0);
+      setGameStart(false);
+      setTime(0);
+      navigate('/')
     }
   }, [shouldRestart, logos]);
 
@@ -54,6 +71,10 @@ function App() {
   }
   const handlequestion = (option) => {
     setNumber(option)
+    navigate('/game');
+    setGameStart(true)
+
+
   };
 
   // Modified to accept visitedList parameter
@@ -108,20 +129,30 @@ function App() {
   };
 
   return (
-    <div>
-      <Header />
-      {number === 0 && <h2>How many problems would you like?</h2> }
-      {number === 0 && <Options options={questions} handleGuess = {handlequestion} /> }
-      {number !== 0 && <Image image={logo} /> }
-      {number !== 0 && <Options options={options} handleGuess={handleguess}/> }
-      <h1>Your current score is {score}</h1>
-      {gameOver && (
-        <div>
-          <h1>The game is over. Good work</h1>
-          <button onClick={onRestart}>Wanna restart?</button>
-        </div>
-      )}
-    </div>
+      <Routes>
+        <Route path = '/' element = {
+          <div style = {{backgroundColor:'lightblue'}}>
+            <Header />
+            <h2 style = {{textAlign:'center'}}>How many problems would you like?</h2> 
+            <Options options={questions} handleGuess = {handlequestion} /> 
+          </div>
+        } />
+        <Route path="/game" element={
+          <>
+        <Header />
+        <Image image={logo} /> 
+        <Options options={options} handleGuess={handleguess}/> 
+        <h1>Your current score is {score}</h1>
+        {gameOver && (
+          <div>
+            <h1>The game is over. Good work</h1>
+            <button onClick={onRestart}>Wanna restart?</button>
+          </div>
+        )}
+        <h2 style = {{textAlign: 'center'}}>Time elapsed: {time}s</h2>
+        </>
+      } />
+    </Routes>
   );
 }
 
