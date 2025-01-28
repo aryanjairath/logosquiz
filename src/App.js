@@ -79,17 +79,29 @@ function App() {
     setLogo(newLogo);
     setVisited([...visitedList, newLogo.name]);
 
-    const filler = [newLogo.name];
+    let filler = [newLogo.name];
     while (filler.length < 4) {
       const randomOption = logosList[Math.floor(Math.random() * logosList.length)].name;
       if (!filler.includes(randomOption)) {
         filler.push(randomOption);
       }
+      filler = shuffle(filler);
     }
 
     setOptions(filler);
   };
+  const shuffle = (array) => {
+    let currentIndex = array.length;
+    while (currentIndex != 0) {
 
+    let randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    return array;
+  }
+
+  }
   // Modified restart handler to use shouldRestart
   const onRestart = () => {
     setShouldRestart(true);
@@ -100,8 +112,8 @@ function App() {
       <Header />
       {number === 0 && <h2>How many problems would you like?</h2> }
       {number === 0 && <Options options={questions} handleGuess = {handlequestion} /> }
-      <Image image={logo} />
-      <Options options={options} handleGuess={handleguess}/>
+      {number !== 0 && <Image image={logo} /> }
+      {number !== 0 && <Options options={options} handleGuess={handleguess}/> }
       <h1>Your current score is {score}</h1>
       {gameOver && (
         <div>
