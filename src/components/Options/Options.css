@@ -1,0 +1,14 @@
+
+.item {
+    display: grid;
+    align-items: center;
+    justify-content: center;
+}
+
+.option {
+    width: 9rem;
+    height: 5em;
+    margin: 0.5rem;
+    font-size: medium;
+    border-radius: 1rem;
+}

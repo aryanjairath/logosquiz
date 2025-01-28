@@ -1,0 +1,12 @@
+.image-container {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+
+}
+
+img {
+    max-width: 8rem;
+    max-height: 8rem;
+    margin:0.5rem;
+}
