@@ -19,6 +19,7 @@ function App() {
   const [attempted, setAttempted] = useState(0)
   const [time, setTime] = useState(0);
   const [gameStart, setGameStart] = useState(false);
+  const [name, setName] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -55,8 +56,9 @@ function App() {
       setAttempted(0);
       setNumber(0);
       setGameStart(false);
+      setName('')
       setTime(0);
-      navigate('/')
+      navigate('/');
     }
   }, [shouldRestart, logos]);
 
@@ -73,16 +75,25 @@ function App() {
     setNumber(option)
     navigate('/game');
     setGameStart(true)
-
-
   };
 
-  // Modified to accept visitedList parameter
+  const handleEnterPress = (text) => {
+    setName(text); 
+  };
+
   const generateQuestion = (logosList, visitedList = visited) => {
     if (attempted === number-1 && number != 0) {
+      const data = {
+        username: name,
+        time: time,
+        score: score,
+        totalQuestions: attempted+1
+      };
+      axios.post("http://localhost:5000/api/leaderboard", data)
       setGameOver(true);
       return;
     }
+    console.log(name);
 
     let randomIndex;
     let attempts = 0;
@@ -132,9 +143,9 @@ function App() {
       <Routes>
         <Route path = '/' element = {
           <div style = {{backgroundColor:'lightblue'}}>
-            <Header />
-            <h2 style = {{textAlign:'center'}}>How many problems would you like?</h2> 
-            <Options options={questions} handleGuess = {handlequestion} /> 
+            <Header onEnter={handleEnterPress}/>
+            {name && <h2 style = {{textAlign:'center'}}>How many problems would you like?</h2>}
+            {name && <Options options={questions} handleGuess = {handlequestion} />} 
           </div>
         } />
         <Route path="/game" element={

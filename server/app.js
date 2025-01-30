@@ -1,7 +1,9 @@
 const express = require('express');
-const app = express();
+const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
+const app = express();
 app.use(cors());
+app.use(express.json()); // ✅ This line allows Express to parse JSON request bodies
 
 const logos = [
     { id: 1, name: "Adidas", image: "https://cdn.britannica.com/94/193794-050-0FB7060D/Adidas-logo.jpg" },
@@ -22,4 +24,38 @@ app.get('/api/logos', (req, res) => {
   res.json(logos);
 });
 
-app.listen(5000, () => console.log('Server running on port 3000'));
+const db = new sqlite3.Database("leaderboard.db", (err) => {
+    if(err){
+        console.error(err.message);
+    }else{
+        console.log("Connected to sqlite database");
+        db.run("CREATE TABLE IF NOT EXISTS leaderboard (id INTEGER PRIMARY KEY, username VARCHAR(20), time INTEGER, score INTEGER, totalQuestions INTEGER)");
+    }
+});
+
+app.post('/api/leaderboard', (req, res) => {
+    const {username, time, score, totalQuestions} = req.body
+    db.run(
+        "INSERT INTO leaderboard (username, time, score, totalQuestions) VALUES (?, ?, ?, ?)",
+        [username, time, score, totalQuestions],
+        function (err) {
+          if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+          }
+          res.json({ message: "Leaderboard updated!", id: this.lastID });
+        }
+      );    
+});
+
+app.get('/api/leaderboard', (req, res) => {
+    db.all("SELECT * FROM leaderboard ORDER BY score DESC", [], (err, rows) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      res.json(rows);
+    });
+  });
+  
+app.listen(5000, () => console.log('Server running on port 5000'));
