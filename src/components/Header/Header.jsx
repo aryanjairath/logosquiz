@@ -22,8 +22,8 @@ const Header = ({onEnter}) => {
                     value={inputValue}
                     onChange={handleChange}
                     onKeyDown={handleKeyDown} 
-                    placeholder="Type something and press Enter..." 
-                    style = {{scale: '1.5'}}/>
+                    placeholder="Enter your name" 
+                    style = {{scale: '1.9', borderRadius: '1rem', padding:'0.2rem'}}/>
             </div>
         </div>
     );
