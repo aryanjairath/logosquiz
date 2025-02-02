@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Routes, Route, useLocation } from 'react-router-dom';
 
-import axios from 'axios';
+import axios, { getAdapter } from 'axios';
 import Header from './components/Header/Header';
 import Image from './components/Image/Image';
 import Options from './components/Options/Options';
@@ -21,6 +21,7 @@ function App() {
   const [time, setTime] = useState(0);
   const [gameStart, setGameStart] = useState(false);
   const [name, setName] = useState('');
+  const [hasSubmittedScore, setHasSubmittedScore] = useState(false)
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,6 +47,23 @@ function App() {
     return () => clearInterval(interval);
 
   }, [gameStart, gameOver]);
+  
+  useEffect(() => {
+    const submitScore = async () => {
+      if (gameOver && !hasSubmittedScore){
+        const data = {
+          username: name,
+          time: time,
+          score: score,
+          totalQuestions: attempted
+        };
+        axios.post("http://localhost:5000/api/leaderboard", data)
+        setHasSubmittedScore(true)
+        return;
+      } 
+    }
+    submitScore()
+  }, [gameOver, hasSubmittedScore]);
 
   useEffect(() => {
     if (shouldRestart) {
@@ -64,9 +82,9 @@ function App() {
   }, [shouldRestart, logos]);
 
   const handleguess = (option) => {
+    if(gameOver)
+      return;
     setAttempted(attempted + 1)
-    if (gameOver) return;
-    
     if (option === logo.name) {
       setScore(prev => prev + 1);
     }
@@ -83,18 +101,11 @@ function App() {
   };
 
   const generateQuestion = (logosList, visitedList = visited) => {
+
     if (attempted === number-1 && number != 0) {
-      const data = {
-        username: name,
-        time: time,
-        score: score,
-        totalQuestions: attempted+1
-      };
-      axios.post("http://localhost:5000/api/leaderboard", data)
       setGameOver(true);
       return;
     }
-    console.log(name);
 
     let randomIndex;
     let attempts = 0;
@@ -122,6 +133,7 @@ function App() {
     }
 
     setOptions(filler);
+    
   };
   const shuffle = (array) => {
     let currentIndex = array.length;
