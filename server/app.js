@@ -57,5 +57,15 @@ app.get('/api/leaderboard', (req, res) => {
       res.json(rows);
     });
   });
+
+  app.get('/api/leaderboard/:name', (req, res) => {
+    db.all(`SELECT * FROM leaderboard WHERE username =  '${req.params.name}' ORDER BY score DESC`, [], (err, rows) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      res.json(rows);
+    });
+  });
   
 app.listen(5000, () => console.log('Server running on port 5000'));
