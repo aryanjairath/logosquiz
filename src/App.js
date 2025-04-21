@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Routes, Route, useLocation } from 'react-router-dom';
-
 import axios, { getAdapter } from 'axios';
-import Header from './components/Header/Header';
-import Image from './components/Image/Image';
-import Options from './components/Options/Options';
+// import Header from './components/Header/Header';
+// import Image from './components/Image/Image';
+// import Options from './components/Options/Options';
+import Welcome from './components/Welcome/Welcome';
 import Leaderboard from './components/Leaderboard/Leaderboard';
+import Game from './Game/Game';
 
 function App() {
   const [logos, setLogos] = useState([]);
@@ -161,25 +162,22 @@ function App() {
       <Routes>
         <Route path = '/' element = {
           <div>
-            {!name && <Header onEnter={handleEnterPress}/> }
-            {name && <h2 style = {{textAlign:'center'}}>How many problems would you like?</h2>}
-            {name && <Options options={questions} handleGuess = {handlequestion} />} 
+            <Welcome name = {name} handleEnterPress = {handleEnterPress} questions = {questions} handlequestion = {handlequestion} />
           </div>
         } />
         <Route path="/game" element={
-          <>
-          <Image image={logo} /> 
-          <Options options={options} handleGuess={handleguess}/> 
-          <h1>Your current score is {score}</h1>
-          {gameOver && (
-            <div>
-              <h1>The game is over. Good work</h1>
-              <button onClick={onRestart}>Wanna restart?</button>
-              <button onClick={onLeaderboard}>Check out the leaderboard</button>
-            </div>
-          )}
-          <h2 style = {{textAlign: 'center'}}>Time elapsed: {time}s</h2>
-          </>
+          <Game 
+            name = {name} 
+            time = {time} 
+            handleEnterPress = {handleEnterPress} 
+            handleguess = {handleguess}
+            onRestart = {onRestart}
+            onLeaderboard = {onLeaderboard}
+            gameOver = {gameOver}
+            logo = {logo}
+            options = {options}
+            score = {score}
+          />
         } />
 
         <Route path = '/leaderboard' element = {
